@@ -276,8 +276,13 @@ namespace sb {
 
             void erase(Char letter) {
                 static_assert(!Const, "State must be non-const");
-                auto [begin, end] = _iter->_jumps.equal_range(letter);
-                _iter->_jumps.erase(begin, end);
+                for (auto it = _iter->_jumps.begin(); it != _iter->_jumps.end();) {
+                    if (it->_char == letter) {
+                        auto delIt = it;
+                        ++ it;
+                        _iter->_jumps.erase(delIt);
+                    } else { ++ it; }
+                }
             }
 
             size_t count(Char letter) const {
