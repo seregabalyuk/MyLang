@@ -1,7 +1,5 @@
 #include <iostream>
-#include <map>
-#include <sstream>
-
+#include <vector>
 
 #include "FA/PrintFA.hpp"
 #include "FA/RE2DFA.hpp"
@@ -12,5 +10,5 @@ int main() {
     auto mdfa = sb::RE2DFA(str.begin(), str.end());
 
     sb::printFA(std::cout, mdfa) << '\n';
-
+   
 }
