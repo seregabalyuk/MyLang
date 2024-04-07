@@ -40,8 +40,8 @@ cfg.emplace_nonterminal(name);   // return NonTerminal
 
 cfg.emplace_rule(nonTerminal);   // return Rule
 
-cfg.get_rule(nonTerminal); // return {begin, end} of Rule
-const_cfg.get_rule(nonTerminal); // return {begin, end} of ConstRule
+cfg.rules(nonTerminal); // return {begin, end} of Rule
+const_cfg.rules(nonTerminal); // return {begin, end} of ConstRule
 ```
 
 ## struct Symbol and ConstSymbol
@@ -103,12 +103,9 @@ if (symbol.is_terminal()) {
 
     rule.emplace(symbol);
 
-    rule.symbol(); // return NonTerminal
-    constRule.symbol(); // return ConstNonTerminal
+    rule.argument(); // return NonTerminal
+    constRule.argument(); // return ConstNonTerminal
     ```
-
-
-
 
 ## struct Terminal and ConstTerminal
 ### Requirements
