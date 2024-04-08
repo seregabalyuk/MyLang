@@ -7,11 +7,12 @@
 
 namespace sb {
     template<
+        bool IsNFA,
         class T = void,
         class Char = char,
         class StateType = uint64_t,
-        class Allocator = std::allocator<T>,
-        bool IsNFA = true>
+        class Allocator = std::allocator<T>
+    >
     class FA {
     public:
       // classes

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../TypeTraits/DeclVal.hpp"
+#include <TypeTraits/DeclVal.hpp>
 
 namespace sb {
     template<class Symbol>

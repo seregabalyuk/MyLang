@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 
-#include "../Class/Concepts.hpp"
+#include <FA/Class/Concepts.hpp>
 
 namespace sb {
     template<C_FA InFA, C_FA OutFA = InFA>

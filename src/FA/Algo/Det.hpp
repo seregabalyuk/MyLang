@@ -3,7 +3,7 @@
 #include <set>
 #include <map>
 
-#include "../Class/Concepts.hpp"
+#include <FA/Class/Concepts.hpp>
 
 namespace sb {
 

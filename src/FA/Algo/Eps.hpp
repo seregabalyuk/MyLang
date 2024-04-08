@@ -2,7 +2,7 @@
 
 #include <set>
 
-#include "../Class/Concepts.hpp"
+#include <FA/Class/Concepts.hpp>
 
 namespace sb {
 /// Set has to work with your states

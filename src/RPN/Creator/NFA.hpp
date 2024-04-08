@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../FA/Class/Concepts.hpp"
+#include <FA/Class/Concepts.hpp>
 
 namespace sb {
     template<C_NFA NFA>

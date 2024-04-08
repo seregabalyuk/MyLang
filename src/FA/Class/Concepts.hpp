@@ -2,8 +2,8 @@
 
 #include <concepts>
 
-#include "../../TypeTraits/DeclVal.hpp"
-#include "../../TypeTraits/Bindings.hpp"
+#include <TypeTraits/DeclVal.hpp>
+#include <TypeTraits/Bindings.hpp>
 
 namespace sb {
 // Traits

@@ -1,7 +1,7 @@
 #pragma once
 
-#include "../RPN.hpp"
-#include "../Creator/NFA.hpp"
+#include <RPN/Class/RPN.hpp>
+#include <RPN/Creator/NFA.hpp>
 #include "NFAfunctions.hpp"
 
 namespace sb {

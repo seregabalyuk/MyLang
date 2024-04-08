@@ -64,12 +64,12 @@ sb::FATraits<YourFA>::ConstTransition; // return ConstTransition
     Example:
     ```c++
     State state;
-    for (auto transition: state) {
+    for (auto& transition: state) {
         // your code
     }
 
     ConstState constState;
-    for (auto constTransition: constState) {
+    for (auto& constTransition: constState) {
         // your code
     }
     ```
@@ -101,12 +101,12 @@ sb::FATraits<YourFA>::ConstTransition; // return ConstTransition
     state[letter]; // return next State
     constState[letter]; // return next ConstState
     ```
-4) **(Not used)** If **NFA** is, **State** and **ConstState** must have **operator[]**:
+4) If **NFA** is, **State** and **ConstState** must have **operator[]**:
     ```c++
-    for (auto& nextState: state[letter]) {
+    for (auto& Transition: state[letter]) {
         // your code
     }
-    for (const auto& nextState: constState[letter]) {
+    for (auto& ConstTransition: constState[letter]) {
         // your code
     }
     ```

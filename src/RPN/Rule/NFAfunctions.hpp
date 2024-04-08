@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../../FA/Class/NFA.hpp"
+#include <FA/Class/NFA.hpp>
 
 namespace sb {
     sb::DefaultNFA concatDefault(sb::DefaultNFA&& left, sb::DefaultNFA&& right) {

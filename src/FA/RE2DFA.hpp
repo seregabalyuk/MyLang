@@ -1,11 +1,11 @@
 #pragma once
 
-#include "Class/Concepts.hpp"
-#include "Class/DFA.hpp"
-#include "../RPN/Rule/MyRE.hpp"
-#include "Algo/Det.hpp"
-#include "Algo/Eps.hpp"
-#include "Algo/Minimize.hpp"
+#include <FA/Class/Concepts.hpp>
+#include <FA/Class/DFA.hpp
+#include <RPN/Rule/MyRE.hpp>
+#include <FA/Algo/Det.hpp>
+#include <FA/Algo/Eps.hpp>
+#include <FA/Algo/Minimize.hpp>
 
 #include "PrintFA.hpp"
 

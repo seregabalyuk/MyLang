@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "Class/Concepts.hpp"
+#include <FA/Class/Concepts.hpp>
 
 namespace sb {
     template<class Ostream, C_FA FA>

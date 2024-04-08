@@ -4,7 +4,7 @@
 #include "Concepts.hpp"
 
 namespace sb {
-    using DefaultNFA = FA<void, char, uint64_t, std::allocator<void>, 1>;
+    using DefaultNFA = FA<1, void, char, uint64_t, std::allocator<void>>;
     
     template<C_NFA NFA>
     NFA concat(NFA&& left,
