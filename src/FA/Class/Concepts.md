@@ -28,16 +28,15 @@ const FA const_fa;
 // not have any nodes (start too)
 fa.emplace();     // emplace node return State
 fa.emplace(type); // emplace node return State
-fa.erase(constState);  // erase Node by state
+fa.erase(iter);   // erase Node by iter
 
-fa.begin();       // return State
-fa.cbegin();      // return ConstState
-const_fa.begin(); // return ConstState
+fa.begin();       // return iter
+fa.cbegin();      // return constiter
+const_fa.begin(); // return constiter
 ```
 You can check your **FA** use concepts:
 ```c++
 sb::C_FA<FA>         // check FA
-sb::C_NFA<NFA>       // check NFA
 sb::C_DFA<DFA>       // check DFA
 ```
 
@@ -65,21 +64,14 @@ sb::FATraits<YourFA>::ConstTransition; // return ConstTransition
     Example:
     ```c++
     State state;
-    for (auto [letter, nextState]: state) {
+    for (auto transition: state) {
         // your code
     }
 
     ConstState constState;
-    for (auto [letter, nextConstState]: constState) {
+    for (auto constTransition: constState) {
         // your code
     }
-    ```
-
-    Important:
-
-    ```c++
-    std::range::iterator_t<State>;      // get Transition
-    std::range::iterator_t<ConstState>; // get ConstTransition
     ```
 
 2) **State** and **ConstState** must have metods:
@@ -87,7 +79,7 @@ sb::FATraits<YourFA>::ConstTransition; // return ConstTransition
     constState.type();      // return const Type&
 
     state.type();           // return Type&
-    state.emplace(letter, otherConstState);
+    state.emplace(letter, otherConstState); // return Transition
     state.erase(letter, otherConstState);
     state.erase(letter);    // remove all transitions using this letter
     ```
@@ -108,9 +100,8 @@ sb::FATraits<YourFA>::ConstTransition; // return ConstTransition
     ```c++
     state[letter]; // return next State
     constState[letter]; // return next ConstState
-    
     ```
-4) If **NFA** is, **State** and **ConstState** must have **operator[]**:
+4) **(Not used)** If **NFA** is, **State** and **ConstState** must have **operator[]**:
     ```c++
     for (auto& nextState: state[letter]) {
         // your code
@@ -125,11 +116,9 @@ You can check your **State** and **ConstState** use concepts:
 ```c++
 sb::C_StateFA<State>    // check State in FA
 sb::C_StateDFA<State>   // check State in DFA
-sb::C_StateNFA<State>   // check State in NFA
 
 sb::C_ConstStateFA<State>    // check State in FA
 sb::C_ConstStateDFA<State>   // check State in DFA
-sb::C_ConstStateNFA<State>   // check State in NFA
 ```
 
 ### Possibilities
@@ -145,19 +134,20 @@ sb::StateFATraits<YourState>::Transition; // return Transition
 ### Requirements
 Transition and ConstTransition must support this syntax:
 ```c++
-tran
-auto [letter, state] = *transition;
-auto [letter, constState] = *constTransition;
-// letter is Char
-// state is State
-// transition is Transition
+Transition transition;
+ConstTransition constTransition;
+
+transition.letter(); // return Char
+constTransition.letter(); // return Char
+
+transition.next(); // return State
+constTransition.next(); // return ConstState
 ```
-More about [binding](https://en.cppreference.com/w/cpp/language/structured_binding)
 
 You can check your **Transition** and **ConstTransition** use concepts:
 ```c++
-sb::C_TransitionFA<Transition>              // check Transition in FA
-sb::C_TransitionFA<ConstTransition>    // check ConstTransition in FA
+//sb::C_TransitionFA<Transition>              // check Transition in FA
+//sb::C_TransitionFA<ConstTransition>    // check ConstTransition in FA
 // Transition in DFA and NFA don't change
 ```
 

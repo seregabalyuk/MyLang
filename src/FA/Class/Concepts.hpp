@@ -98,7 +98,7 @@ namespace sb {
         using Type = decltype(*std::declval<Iter>());
     };
 
-    template<class State>
+    /*template<class State>
     concept C_BaseStateNFA = 
         std::same_as<typename __BracesNFAT<State>::Type, State> &&
         requires(typename __BracesNFAT<State>::Range type) {
@@ -116,7 +116,7 @@ namespace sb {
     concept C_ConstStateNFA = 
         C_ConstStateFA<State> &&
         C_BaseStateNFA<State>
-    ;
+    ;*/
 
     template<class State>
     struct __BracesDFAT {
@@ -159,10 +159,11 @@ namespace sb {
             {c_state = state};
     };
 
-    template<class FA>
+    /*template<class FA>
     concept C_NFA = C_FA<FA> && 
         C_StateNFA<typename FATraits<FA>::State> &&
         C_ConstStateNFA<typename FATraits<FA>::ConstState>;
+    */
 
     template<class FA>
     concept C_DFA = C_FA<FA> && 
