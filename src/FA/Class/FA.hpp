@@ -221,7 +221,7 @@ namespace sb {
             }
         };
       // _Compare
-         struct _Compare {
+        struct _Compare {
             bool operator() (const Transition& trans1, const Transition& trans2) const noexcept {
                 if (IsNFA) {
                     if (trans1.letter() == trans2.letter()) {

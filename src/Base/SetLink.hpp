@@ -29,8 +29,11 @@ namespace sb  {
         using const_iterator = _BaseIter<1>;
         
       // functions
-        template<class ...Args>
-        SetLink(Args&&... args): _set(std::forward<Args>(args)...) {}
+        SetLink(): _set() {}
+        SetLink(SetLink&& other): _set(std::move(other._set)), _hash(other._hash) {}
+        SetLink(const SetLink& other): _set(other._set), _hash(other._hash) {}
+        
+        
         iterator emplace(T& value) {
             auto [iter, _] = _set.emplace(getInt(value));
             _hash += getInt(value);
@@ -96,6 +99,11 @@ namespace sb  {
 
         size_t hash() const noexcept {
             return std::hash<Int>()(_hash);
+        }
+
+        void swap(SetLink& other) {
+            std::swap(_hash, other._hash);
+            std::swap(_set, other._set);
         }
     private:
       // _BaseIter
@@ -165,7 +173,7 @@ namespace sb  {
         }
       // members
         _SetInt _set;
-        Int _hash;
+        Int _hash = 0;
     };
 } // namespace sb
 

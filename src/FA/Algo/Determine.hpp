@@ -8,7 +8,7 @@
 
 namespace sb {
 
-    template< C_FA InFA, C_FA OutFA = InFA>
+    template<C_FA OutFA, C_FA InFA>
     OutFA determine(const InFA& inFA);
 
 /// Realization
@@ -43,7 +43,7 @@ namespace sb {
         return stateInFA;
     }
 
-    template<C_FA InFA, C_FA OutFA>
+    template<C_FA OutFA, C_FA InFA>
     OutFA determine(const InFA& inFA) {
         using InState = FATraitsSt<InFA>;
         using OutState = FATraitsSt<OutFA>;

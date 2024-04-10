@@ -1,25 +1,13 @@
-#include <bits/stdc++.h>
+#include <iostream>
 
-#include <FA/PrintFA.hpp>
-//#include "FA/RE2DFA.hpp"
-
-#include <FA/Class/FA.hpp>
-
-#include <FA/Class/Concept.hpp>
-#include <FA/Algo/Eps.hpp>
-#include <FA/Algo/Determine.hpp>
-
-#include <RPN/Rule/MyRE.hpp>
-
+#include <RE/RE2DFA.hpp>
+#include <FA/Print.hpp>
 
 template<sb::C_NFA FA>
 void check() {}
 
 int main() {
    std::string str = "[1-9]|[0-9]*+0";
-   auto nfa = sb::ruleMyRE(str.begin(), str.end());
-
-   sb::removeEps(nfa);
-   auto nfa2 = sb::determine(nfa);
-   sb::printFA(std::cout, nfa2);
+   auto dfa = sb::RE2DFA(str.begin(), str.end());
+   sb::printFA(std::cout, dfa);
 }

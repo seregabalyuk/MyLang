@@ -42,6 +42,4 @@ namespace sb {
         Iter _begin;
         Iter _end;
     };
-// realization
-  // 
 } // namespace sb
