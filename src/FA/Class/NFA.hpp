@@ -4,7 +4,16 @@
 #include "Concepts.hpp"
 
 namespace sb {
-    using DefaultNFA = FA<1, void, char, uint64_t, std::allocator<void>>;
+    using NFA = FA<1>;
+
+    template<class Char>
+    using NFA = FA<1, Char>;
+
+    template<class Char, class StateType>
+    using NFA = FA<1, Char, StateType>;
+
+    template<class Char, class StateType, class Alloc>
+    using NFA = FA<1, Char, StateType, Alloc>;
     
     template<C_NFA NFA>
     NFA concat(NFA&& left,
@@ -28,18 +37,6 @@ namespace sb {
         ret.splice(right);
         finishL.emplace(eps, ret.finish());
         ret.start().emplace(eps, startR);
-        /*
-        auto start = ret.emplace();
-        start.emplace(eps, left.start());
-        start.emplace(eps, right.start());
-        auto finishL = left.finish();
-        auto finishR = right.finish();
-        ret.splice(left);
-        ret.splice(right);
-        auto finish = ret.emplace();
-        finishL.emplace(eps, finish);
-        finishR.emplace(eps, finish);
-        */
         return ret;
     }
 

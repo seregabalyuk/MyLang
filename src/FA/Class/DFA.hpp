@@ -3,5 +3,14 @@
 #include "FA.hpp"
 
 namespace sb {
-    using DefaultDFA = FA<0, void, char, uint64_t, std::allocator<void>>;
+    using DFA = FA<0>;
+
+    template<class Char>
+    using DFA = FA<0, Char>;
+
+    template<class Char, class StateType>
+    using DFA = FA<0, Char, StateType>;
+
+    template<class Char, class StateType, class Alloc>
+    using DFA = FA<0, Char, StateType, Alloc>;
 } // namespace sb

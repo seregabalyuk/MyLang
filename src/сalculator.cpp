@@ -2,7 +2,7 @@
 #include <map>
 #include <sstream>
 
-#include "RPN/RPN.hpp"
+/*#include "RPN/RPN.hpp"
 
 struct Creator {
     long double out = 0;
@@ -46,15 +46,15 @@ long double minus(long double&& a, long double&& b) {
 long double del(long double&& a, long double&& b) {
     return a / b;
 }
-
+*/
 
 int main() {
-    sb::RPN<Creator> rpn;
+    /*sb::RPN<Creator> rpn;
     rpn.addBinary('+', 1, plus);
     rpn.addBinary('*', 2, multy);
     rpn.addBinary('/', 2, del);
     rpn.addBinary('-', 1, minus);
     rpn.addBrackets('(', ')');
     
-    std::cout << rpn(std::cin) << '\n';
+    std::cout << rpn(std::cin) << '\n';*/
 }
