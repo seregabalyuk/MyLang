@@ -1,67 +1,66 @@
 #pragma once
 
-#include <set>
+#include <algorithm>
 
-#include <FA/Class/Concepts.hpp>
+#include <FA/Class/Concept.hpp>
+
+#include "SetStateFA.hpp"
 
 namespace sb {
 /// Set has to work with your states
 
-    template<C_FA FA, class Set = std::set<typename FATraits<FA>::State>>
-    void RemoveEps(FA& fa, typename FATraits<FA>::Char eps = 0);
+    template<C_FA FA>
+    void removeEps(FA& fa, FATraitsLe<FA> eps = FATraitsLe<FA>());
 
 /// Realization
-    template<class State, class Char, class Set>
-    void FindEps(State state, Char eps, Set& visits) {
+    template<C_FA FA>
+    void findEps(FATraitsSt<FA>& state, FATraitsLe<FA> eps, SetStateFA<FA>& visits) {
         if (visits.count(state)) { return; }
         visits.emplace(state);
-        for(auto [letter, next]: state) {
-            if (letter == eps) {
-                FindEps(next, eps, visits);
+        for(auto& trans: state) {
+            if (trans.letter() == eps) {
+                findEps<FA>(trans.next(), eps, visits);
             }
         }
     }
 
-    template<class State, class Char, class Set>
-    void VisitAll(State state, Char eps, Set& visits) {
+    template<C_FA FA>
+    void visitAll(FATraitsSt<FA>& state, FATraitsLe<FA> eps, SetStateFA<FA>& visits) {
         if (visits.count(state)) { return; }
         visits.emplace(state);
 
-        Set epsmates;
-        FindEps(state, eps, epsmates);
+        SetStateFA<FA> epsmates;
+        findEps<FA>(state, eps, epsmates);
 
-        for (auto mate: epsmates) {
+        for (auto& mate: epsmates) {
             state.type() |= mate.type();
-            for(auto [letter, next]: mate) {
-                state.emplace(letter, next);
+            for(auto& trans: mate) {
+                state.emplace(trans.letter(), trans.next());
             }
         }
 
-        for(auto [letter, next]: state) {
-            VisitAll(next, eps, visits);
+        for(auto& trans: state) {
+            visitAll<FA>(trans.next(), eps, visits);
         }
     }
+    
+    template<class FA>
+    struct _RemoverFA {
+        SetStateFA<FA>& _set;
 
-    template<class State, class Set>
-    void VisitErase(State state, Set& visits) {
-        if (!visits.count(state)) { return; }
-        visits.erase(state);
-        for(auto [letter, next]: state) {
-            VisitErase(next, visits);
-        }
-    }
+        bool operator()(FATraitsSt<FA>& state) const {
+            return !_set.count(state);
+        };
+    };
 
-    template<C_FA FA, class Set>
-    void RemoveEps(FA& fa, typename FATraits<FA>::Char eps) {
-        Set visits;
-        VisitAll(fa.start(), eps, visits);
-        for (auto state: visits) {
+    template<C_FA FA>
+    void removeEps(FA& fa, FATraitsLe<FA> eps) {
+        SetStateFA<FA> visits;
+        visitAll<FA>(fa.start(), eps, visits);
+        for (auto& state: visits) {
             state.erase(eps);
         }
-        VisitErase(fa.start(), visits);
-        for (auto state: visits) {
-            fa.erase(state);
-        }
+        std::remove_if(fa.begin(), fa.end(), _RemoverFA<FA>(visits));
     }
 
     

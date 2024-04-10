@@ -1,8 +1,6 @@
 #pragma once
 
-#include <TypeTraits/DeclVal.hpp>
-
-#include "IteratorTraits.hpp"
+#include <TypeTraits/IteratorTraits.hpp>
 
 namespace sb {
     template<class Iter>

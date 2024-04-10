@@ -5,17 +5,17 @@
 #include "NFAfunctions.hpp"
 
 namespace sb {
-    RPN<CreatorNFA<DefaultNFA>> ruleMyRE;
+    RPN<CreatorNFA<NFA>> ruleMyRE;
 
 // Realization
 
     struct _StaticCreatorRuleMyRE {
         _StaticCreatorRuleMyRE() {
-            ruleMyRE.addBinary('|', 2, concatDefault);
-            ruleMyRE.addBinary('+', 1, alterDefault);
-            ruleMyRE.addSufUnary('*', 3, kleeneDefault);
+            ruleMyRE.addBinary('|', 2, concatNFA);
+            ruleMyRE.addBinary('+', 1, alterNFA);
+            ruleMyRE.addSufUnary('*', 3, kleeneNFA);
             ruleMyRE.addBrackets('(', ')');
-            ruleMyRE.addEndUnary(finalyDefault);
+            ruleMyRE.addEndUnary(finalyNFA);
         }
     };
 

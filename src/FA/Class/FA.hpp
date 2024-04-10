@@ -4,10 +4,9 @@
 #include <list>
 #include <cstdint>
 #include <ranges>
-#include <algorithm>
 
 #include <TypeTraits/Identity.hpp>
-#include <TypeTraits/SubRange.hpp>
+#include <Base/SubRange.hpp>
 
 namespace sb {
     template<
@@ -123,7 +122,7 @@ namespace sb {
             }
 
             void erase(Char letter) & {
-                std::remove_if(_trans.begin(), _trans.end(), _UnaryPred(letter));
+                std::erase_if(_trans, _UnaryPred(letter));
             }
 
             size_t count(Char letter) const {
@@ -176,7 +175,7 @@ namespace sb {
 
             State& next() & { return *_next; }
             const State& next() const & { return *_next; }
-        private:
+        private:    
           // members
             Char _letter;
             _Ptr<State> _next;
@@ -217,7 +216,7 @@ namespace sb {
       // _UnaryPred
         struct _UnaryPred {
             Char letter;
-            bool operator()(const Transition& trans) {
+            bool operator()(const Transition& trans) const {
                 return trans.letter() == letter;
             }
         };

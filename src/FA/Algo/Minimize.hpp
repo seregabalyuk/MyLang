@@ -43,6 +43,7 @@ namespace sb {
                     schar.emplace(letter);
                 }
             }
+
             /*if (!t2g.count(Type())) {
                 t2g.emplace(Type(), groups.size());
                 groups.emplace_back();

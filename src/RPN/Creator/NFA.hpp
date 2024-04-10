@@ -1,6 +1,6 @@
 #pragma once
 
-#include <FA/Class/Concepts.hpp>
+#include <FA/Class/Concept.hpp>
 
 namespace sb {
     template<C_NFA NFA>
@@ -8,11 +8,11 @@ namespace sb {
     private:
     public:
       // usings
-        using Char = FATraits<NFA>::Char;
+        using Letter = FATraitsLe<NFA>;
       // function
         CreatorNFA() { _nfa.emplace(); }
 
-        void emplace(Char letter) {
+        void emplace(Letter letter) {
             switch(state) {
             case 0: // default state
                 switch(letter) {
@@ -24,7 +24,7 @@ namespace sb {
                     _nfa.emplace();
                     break;
                 default:
-                    auto finish = _nfa.finish();
+                    auto& finish = _nfa.finish();
                     _nfa.emplace();
                     finish.emplace(letter, _nfa.finish());
                     break;
@@ -35,7 +35,7 @@ namespace sb {
                 case 'e':
                     break;
                 default:
-                    auto finish = _nfa.finish();
+                    auto& finish = _nfa.finish();
                     _nfa.emplace();
                     finish.emplace(letter, _nfa.finish());
                     break;
@@ -51,17 +51,15 @@ namespace sb {
                     state = 3;
                     break;
                 default:
-                    auto prevF = _nfa.finish();
-                    -- prevF;
+                    auto& prevF = *(-- (--_nfa.end()));
                     prevF.emplace(letter, _nfa.finish());
                     helper = letter;
                     break;
                 }
                 break;
             case 3: // in [ - ]
-                auto prevF = _nfa.finish();
-                -- prevF;
-                for (Char it = helper + 1; it != letter + 1; ++ it) {
+                auto& prevF = *(-- (--_nfa.end()));
+                for (Letter it = helper + 1; it != letter + 1; ++ it) {
                     prevF.emplace(it, _nfa.finish());
                 }
                 state = 2;
@@ -84,7 +82,7 @@ namespace sb {
         }
     private:
         NFA _nfa;
-        Char helper;
+        Letter helper;
         size_t state = 0;
     };
 } // namespace sb
