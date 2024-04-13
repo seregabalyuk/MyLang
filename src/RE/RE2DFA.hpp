@@ -5,7 +5,7 @@
 #include <RPN/Rule/MyRE.hpp>
 
 #include <FA/Algo/Determine.hpp>
-#include <FA/Algo/Eps.hpp>
+#include <FA/Algo/RemoveEps.hpp>
 #include <FA/Algo/Minimize.hpp>
 
 namespace sb {

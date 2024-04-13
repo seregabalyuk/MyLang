@@ -6,21 +6,25 @@ namespace sb {
     template<C_NFA NFA>
     void concat(NFA& left,
                 NFA&& right) {
-        for (auto& trans: right.start()) {
-            left.finish().emplace(trans.letter(), trans.next());
-        }
-        left.finish().type() = right.start().type();
-        right.erase(right.begin());
+        auto eps = FATraitsLe<NFA>();
+
+        left.finish().type() = FATraitsTy<NFA>();
+
+        left.finish().emplace(eps, right.start());
+
         left.splice(std::move(right));
     }
 
     template<C_NFA NFA>
     void alter(NFA& left,
                NFA&& right) {
-        for (auto& trans: right.start()) {
-            left.start().emplace(trans.letter(), trans.next());
-        }
-        right.erase(right.begin());
+        auto eps = FATraitsLe<NFA>();
+        
+        left.finish().type() = FATraitsTy<NFA>();
+
+        left.start().emplace(eps, right.start());
+        left.finish().emplace(eps, right.finish());
+        
         left.splice(std::move(right));
     }
 

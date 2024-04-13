@@ -101,7 +101,6 @@ namespace sb {
 			if(!_state().count(letter)) {
 				throw std::string{"State DFA cannot go by "} + letter;
 			}
-            
 			_state = _state()[letter];
             const auto& type = _state().type();
             
@@ -112,11 +111,11 @@ namespace sb {
                     _stackR.emplace_back(rule);
                     break;
                 case RuleRPNType::SuffixUnary:
-                    _removeRuleFromStack(rule);
+                    _removeRulesFromStack(rule);
                     _executeRule(rule);
                     break;
                 case RuleRPNType::Binary:
-                    _removeRuleFromStack(rule);
+                    _removeRulesFromStack(rule);
                     _addRuleToStack(rule);
                     break;
                 default:
@@ -127,8 +126,7 @@ namespace sb {
                 _stackR.emplace_back();
             } else if (type == _typeClose) { // is close bracket
                 while(_stackR.size() && !_stackR.back().empty()) {
-                    _executeRule(_stackR.back());
-                    _stackR.pop_back();
+                    _removeOneRuleFromStack();
                 }
                 if (_stackR.empty()) {
                     throw std::string{"Missing open bracket"};
@@ -141,6 +139,9 @@ namespace sb {
                     _stackT.emplace_back(_creator->get());
                 }
             }
+            #ifdef RPN_DEBUG
+            drawCondition(letter, type);
+            #endif
             return *this;
         } catch (const std::string& error) {
             _defaultSettings();
@@ -170,17 +171,20 @@ namespace sb {
         }
     private:
       // function
-        void _removeRuleFromStack(_LRule rule) {
+        void _removeOneRuleFromStack() {
+            _executeRule(_stackR.back());
+            if (_stackR.back()().type() == RuleRPNType::Binary) {
+                -- _counterTbyR;
+            }
+             _stackR.pop_back();
+        }
+        void _removeRulesFromStack(_LRule rule) {
             while (
                 _stackR.size() &&
                 !_stackR.back().empty() &&
                 _stackR.back()().priority() >= rule().priority()) 
             {
-                _executeRule(_stackR.back());
-                if (rule().type() == RuleRPNType::Binary) {
-                    -- _counterTbyR;
-                }
-                _stackR.pop_back();
+                _removeOneRuleFromStack();
             }
         }
         void _addRuleToStack(_LRule rule) {
@@ -192,7 +196,7 @@ namespace sb {
         void _addEpsRuleToStack() {
             _LRule rule = _table->get(_Letter());
             if (rule().type() == RuleRPNType::Binary) {
-                _removeRuleFromStack(rule);
+                _removeRulesFromStack(rule);
                 _addRuleToStack(rule);
             } else {
                 throw std::string{"Eps rule is not binary"};
@@ -239,6 +243,23 @@ namespace sb {
             _state = _dfa->start();
             _counterTbyR = 0;
         }
+        #ifdef RPNDEBUG
+        void drawCondition(_Letter letter, const _TypeDFA& type) {
+            std::cout << "--------\n";
+            std::cout << letter << ' ' << type << '\n';
+            std::cout << _stackT.size() << ' ' << _stackR.size() << '\n';
+            for (auto& rule: _stackR) {
+                if (rule.empty()) {
+                    std::cout << '(';
+                } else if (rule().letter() == _Letter()) {
+                    std::cout << 'e';
+                } else {
+                    std::cout << rule().letter();
+                }
+            }
+            std::cout << '\n';
+        }
+        #endif
       // members
         const DFA* _dfa;
         Creator* _creator;
