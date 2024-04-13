@@ -31,34 +31,68 @@ namespace sb {
         using Class = SetConstStateFA<InFA>;
         
         using QueClass = SetLink<Class>;
-        using Classes = std::vector<Class>;
-        
+        using Classes = std::list<Class>;
+
         Classes classes;
         { // First classes
-            using Type2Class = std::unordered_map<FATraitsTy<InFA>, size_t>;
+            using Type2Class = std::unordered_map<FATraitsTy<InFA>, Class*>;
             Type2Class type2class;
             for (auto& state: fa) {
                 if (!type2class.count(state.type())) {
-                    type2class.emplace(state.type(), classes.size());
-                    classes.emplace_back();
+                    auto& _class = classes.emplace_back();
+                    type2class.emplace(state.type(), &_class);
                 }
-                classes[type2class[state.type()]].emplace(state);
+                type2class[state.type()]->emplace(state);
             }
         }
         auto letters = getAllLetter(fa);
         QueClass queClass;
+      #ifdef FA_ALGO_DEBUG
+        // lambda
+        auto drawQue = [&fa, &queClass] {
+            std::map<const State*, size_t> s2i;
+            size_t i = 0;
+            for (auto& state: fa) {
+                s2i[&state] = i ++;
+            }
+            std::cout << "Que {";
+            for (auto& _class: queClass) {
+                std::cout << '\n';
+                for(auto& state: _class) {
+                    std::cout << s2i[&state] << ' ';
+                }
+            }
+            std::cout << "}\n";
+        };
+        auto drawClasses = [&fa, &classes] {
+            std::map<const State*, size_t> s2i;
+            size_t i = 0;
+            for (auto& state: fa) {
+                s2i[&state] = i ++;
+            }
+            std::cout << "Classes {";
+            for (auto& _class: classes) {
+                std::cout << '\n';
+                for(auto& state: _class) {
+                    std::cout << s2i[&state] << ' ';
+                }
+            }
+            std::cout << "}\n";
+        };
+      #endif
         { // First que
             for(auto& _class: classes) {
                 queClass.emplace(_class);
             }
         }
+
         { // find partition  FA
             while(queClass.size()) {
                 auto& spliter = *queClass.begin();
                 queClass.erase(spliter);
                 for (auto letter: letters) {
-                    for (size_t i = 0; i < classes.size(); ++ i) {
-                        auto& _class = classes[i];
+                    for (auto& _class: classes) {
+                        //auto& _class = classes[i];
                         Class left, right;
                         // split by spliter and letter
                         for (auto& state: _class) {
@@ -85,21 +119,31 @@ namespace sb {
                                     queClass.emplace(_class);
                                 }
                             }
-                        }
-                    }
-                }
-            }
+                        } // emplace in queClass
+                    } // for by classes
+                } // for by letters
+            } // while
         }
+
         OutFA ret;
         { // Create ret by classes
             using In2Out = std::unordered_map<const State*, FATraitsSt<OutFA>*>;
             In2Out translator;
+            // class with start make first
+            auto iter = classes.begin();
+            while ( iter != classes.end() && !iter->count(fa.start())) {
+                ++ iter;
+            }
+            classes.emplace_front(std::move(*iter));
+            classes.erase(iter);
+            // add state in out
             for (auto& _class: classes) {
                 auto& stateOut = ret.emplace();
                 for (auto& stateIn: _class) {
                     translator[&stateIn] = &stateOut;
                 }
             }
+            // add transition in out
             for (auto& _class: classes) {
                 auto& stateIn = *_class.begin();
                 auto& stateOutPrev = *translator[&stateIn];

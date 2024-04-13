@@ -14,7 +14,7 @@
 namespace sb {
     namespace posix {
         using Letter = char;
-        using NFA = FA<0, Letter>;
+        using NFA = FA<1, Letter>;
 
         using Type = char;
         using DFA = FA<0, Letter, Type>;
@@ -38,12 +38,14 @@ namespace sb {
         creator->putTypeInBrackets('b');
         creator->putTypeOutBrackets('p');
         creator->putTypeSpecial('s');
+        creator->putLetterEmpty('e');
       // make table
         posix::TableRPN* table = new posix::TableRPN();
-		table->addBinary('\0', 1, concat<posix::NFA>);
+		    table->addBinary('\0', 1, concat<posix::NFA>);
         table->addBinary('|', 0, alter<posix::NFA>);
         table->addSufUnary('*', 2, kleene<posix::NFA>);
         table->addSufUnary('+', 2, plus<posix::NFA>);
+        table->addSufUnary('?', 2, question<posix::NFA>);
       // make rpn
         posix::RPN* rpn = new posix::RPN(*dfa, *creator, *table);
         rpn->putTypeTable('t');

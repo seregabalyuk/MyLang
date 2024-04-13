@@ -40,4 +40,10 @@ namespace sb {
         auto eps = FATraitsLe<NFA>();
         nfa.finish().emplace(eps, nfa.start());
     }
+
+    template<C_NFA NFA>
+    void question(NFA& nfa) {
+        auto eps = FATraitsLe<NFA>();
+        nfa.start().emplace(eps, nfa.finish());
+    }
 } // namespace sb

@@ -22,6 +22,10 @@ namespace sb {
             _end = end;
         }
 
+        void putLetterEmpty(_Letter empty) {
+            _empty = empty;
+        }
+
         void putTypeSimple(const Type& type) {
             _simple = type;
         }
@@ -70,7 +74,12 @@ namespace sb {
             } else if (type == _outBrackets) {
                 state = 1;
             } else if (type == _special) {
-                throw std::string{"dont have special"};
+                if (letter == _empty) {
+                    _nfa.start().emplace(_Letter(), _nfa.finish());
+                } else {
+                    _nfa.start().emplace(letter, _nfa.finish());
+                }
+                state = 1;
             }
             _back = letter;
         } catch (const std::string& error) {
@@ -114,6 +123,8 @@ namespace sb {
         _Letter _back;
         _Letter _begin;
         _Letter _end;
+
+        _Letter _empty;
 
         Type _simple;
         Type _reverse;
