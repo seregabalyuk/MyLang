@@ -15,7 +15,7 @@ namespace sb {
         std::is_copy_assignable_v<Type> &&
         requires(Type type, const Type c_type) 
     {
-        {c_type | c_type} -> std::same_as<Type>;
+        {c_type | c_type} -> std::convertible_to<Type>;
         {type |= c_type}  -> std::same_as<Type&>;
     };
   // FA

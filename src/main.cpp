@@ -1,13 +1,29 @@
 #include <iostream>
 
-#include <RE/RE2DFA.hpp>
 #include <FA/Print.hpp>
 
-template<sb::C_NFA FA>
-void check() {}
+#include <RE/PosixRPN.hpp>
+
+void dd(sb::posix::NFA&, sb::posix::NFA&&) {}
+
+template<class Func>
+void add(Func func) {
+	std::cout << typeid(Func).name() << '\n';
+}
+
+
 
 int main() {
-   std::string str = "[1-9]|[0-9]*+0";
-   auto dfa = sb::RE2DFA(str.begin(), str.end());
-   sb::printFA(std::cout, dfa);
+	try {
+		auto all = sb::makePosixRPN();
+		std::string str;
+		std::getline(std::cin, str, '\n');
+		for (auto letter: str) {
+			std::get<0>(all)->put(letter);
+		}
+		auto nfa = std::get<0>(all)->get();
+		sb::printFA(std::cout, nfa);
+	} catch (const std::string& error) {
+		std::cout << error << '\n';
+	}
 }

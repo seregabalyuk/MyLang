@@ -1,308 +1,265 @@
 #pragma once
 
-#include <functional>
-#include <forward_list>
-#include <vector>
-#include <algorithm>
+#include <list>
+#include <string>
+
+#include <Base/Link.hpp>
+#include <FA/Class/Concept.hpp>
+#include <RPN/Class/Concept.hpp>
 
 namespace sb {
     template<
-        class Creator,
-        class Char = char,
-        class Allocator = std::allocator<Char>>
-    class RPN {
+        C_DFA DFA,
+        C_CreatorRPN<
+            FATraitsLe<DFA>,
+            FATraitsTy<DFA>
+        > Creator,
+        C_TableRPN<
+            FATraitsLe<DFA>,
+            CreatorRPNTraitsT<Creator>
+        > Table,
+        class Allocator = std::allocator<void>
+    > class RPN {
     private:
-      // classes
-        struct _Operation;
-        struct _Binary;
-        template<bool Suf>
-        struct _Unary;
-        template<bool Open>
-        struct _Brackets;
       // usings
-        using _T = decltype(std::declval<Creator>().get());
-        using _PreUnary = _Unary<0>;
-        using _SufUnary = _Unary<1>;
+       // from DFA
+        using _Letter = FATraitsLe<DFA>;
+        using _State = const FATraitsSt<DFA>;
+        using _TypeDFA = FATraitsTy<DFA>;
+        using _LState = Link<_State>;
 
+       // from Creator
+        using _T = CreatorRPNTraitsT<Creator>;
+
+       // from Table
+        using _Rule = const TableRPNTraitsR<Table, _Letter>;
+        using _Priority = TableRPNTraitsP<Table, _Letter>;
+        using _TypeTable = TableRPNTraitsT<Table, _Letter>;
+        using _LRule = Link<_Rule>;
+
+       // from Allocator
         template<class U>
         using _Alloc = typename std::allocator_traits<Allocator>::template rebind_alloc<U>;
         template<class U>
         using _AllocTraits = typename std::allocator_traits<Allocator>::template rebind_traits<U>;
         template<class U>
         using _Ptr = _AllocTraits<U>::pointer;
-        using _PtrO = _Ptr<_Operation>;
-        using _PtrCO = _Ptr<const _Operation>;
 
-        using _FuncUn = std::function<_T(_T&&)>;
-        using _FuncBin = std::function<_T(_T&&, _T&&)>;
-
-        using _SymbolToOparation = std::pair<Char, _PtrO>;
-
-        using _VectorS2O = std::vector<_SymbolToOparation, _Alloc<_SymbolToOparation>>;
-        
-        using _StackT = std::forward_list<_T, _Alloc<_T>>;
-        using _StackO = std::forward_list<_PtrCO, _Alloc<_PtrCO>>;
+       // other
+        using _StackT = std::list<_T, _Alloc<_T>>;
+        using _StackR = std::list<_LRule, _Alloc<_LRule>>;
     public:
-      // function
-        RPN(): _s2o()  {
-            _creator = _allocate<Creator>(_alloc());
+      // functions
+       // constructors
+        RPN(const Allocator& alloc):
+            _stackT(alloc),
+            _stackR(alloc) {}
+
+        RPN() {}
+
+        RPN(const DFA& dfa, Creator& creator, const Table& table) {
+            putDFA(dfa);
+            putCreator(creator);
+            putTable(table);
         }
 
-        RPN(const Allocator& alloc): _s2o(alloc) {
-            _creator = _allocate<Creator>(_alloc());
+        RPN(const DFA& dfa, Creator& creator, const Table& table, const Allocator& alloc):
+            _stackT(alloc),
+            _stackR(alloc) {
+            putDFA(dfa);
+            putCreator(creator);
+            putTable(table);
+        }
+       // metods
+        void putDFA(const DFA& dfa) {
+            _dfa = &dfa;
+            _state = _dfa->start();
         }
 
-        template<class ...Args>
-        RPN(const Allocator& alloc, Args&&... args): 
-            _s2o(alloc) {
-            _creator = _allocate<Creator>(_alloc(), std::forward<Args>(args) ...);
+        void putTable(const Table& table) {
+            _table = &table;
         }
 
-        ~RPN() {
-            auto alloc = _alloc();
-            for (auto& s2o: _s2o) {
-                s2o.second->deallocate(alloc, s2o.second);
-            }
-            _deallocate<Creator>(_alloc(), _creator);
+        void putCreator(Creator& creator) {
+            _creator = &creator;
+        }
+
+        void putTypeTable(const _TypeDFA& type) {
+            _typeTable = type;
+        }
+
+        void putTypeBrackets(const _TypeDFA& open, const _TypeDFA& close) {
+            _typeOpen = open;
+            _typeClose = close;
+        }
+
+        void putTypeEmpty(const _TypeDFA& type) {
+            _typeEmpty = type;
         }
         
-        void addBinary(Char symbol, uint priority, _FuncBin func) & {
-            auto alloc = _alloc();
-            _PtrO ptr = _allocate<_Binary>(alloc, priority, func);
-            _s2o.emplace_back(symbol, ptr);
-            std::sort(_s2o.begin(), _s2o.end());
-        }
-
-        void addBrackets(Char open, Char close) & {
-            auto alloc = _alloc();
-            _PtrO ptr1 = _allocate<_Brackets<1>>(alloc);
-            _PtrO ptr2 = _allocate<_Brackets<0>>(alloc);
-            _s2o.emplace_back(open, ptr1);
-            _s2o.emplace_back(close, ptr2);
-            std::sort(_s2o.begin(), _s2o.end());
-        }
-
-        void addSufUnary(Char symbol, uint priority, _FuncUn func) & {
-            auto alloc = _alloc();
-            _PtrO ptr = _allocate<_SufUnary>(alloc, priority, func);
-            _s2o.emplace_back(symbol, ptr);
-            std::sort(_s2o.begin(), _s2o.end());
-        }
-
-        void addPreUnary(Char symbol, uint priority, _FuncUn func) & {
-            auto alloc = _alloc();
-            _PtrO ptr = _allocate<_PreUnary>(alloc, priority, func);
-            _s2o.emplace_back(symbol, ptr);
-            std::sort(_s2o.begin(), _s2o.end());
-        }
-
-        void addEndBinary(_FuncBin func) & {
-            _endFuncBin = func;
-        }
-
-        void addEndUnary(_FuncUn func) & {
-            _endFuncUn = func;
-        }
-
-        template<class Istream>
-        _T operator()(Istream& in) const {
-            _creator->clear();
-            _StackT stackT;
-            _StackO stackO;
-            while(in) {
-                _processSymbol(in.get(),stackT, stackO);
-            }
-            return _completion(stackT, stackO);
-        } 
-
-        template<class Iter>
-        _T operator()(Iter begin, Iter end) const {
-            _creator->clear();
-            _StackT stackT;
-            _StackO stackO;
-            for(; begin != end; ++ begin) {
-                _processSymbol(*begin, stackT, stackO);
-            }
-            return _completion(stackT, stackO);
-        } 
-    private:
-      // _Operator
-        struct _Operation {
-        private:
-            int _priority;
-        public:
-            _Operation(int priority): _priority(priority) {}
-            int& priority() { return _priority; }
-            int priority() const { return _priority; }
-            virtual ~_Operation() {}
-            virtual void deallocate(Allocator alloc, _PtrO ptr) = 0;
-            virtual void addStack(_PtrCO me,  _StackT& stackT, _StackO& stackO) const = 0;
-            virtual void delStack(_StackT& stackT) const = 0;
-        };
-      // _Binary
-        struct _Binary: public _Operation {
-        private:
-            using _Operation::priority;
-            _FuncBin _func;
-        public:
-            _Binary(int priority, _FuncBin func): 
-                _Operation(priority),
-                _func(func) {}
+        RPN& put(_Letter letter) try {
+			if(!_state().count(letter)) {
+				throw std::string{"State DFA cannot go by "} + letter;
+			}
             
-            void deallocate(Allocator alloc, _PtrO ptr) override {
-                using This = _Binary;
-                auto thisPtr = static_cast<_Ptr<This>>(ptr);
-                _Alloc<This> localAlloc(alloc);
-                This* realPtr = &*thisPtr;
-                _AllocTraits<This>::destroy(localAlloc, realPtr);
-                _AllocTraits<This>::deallocate(localAlloc, thisPtr, 1);
-            }
-            void addStack(_PtrCO me, _StackT& stackT, _StackO& stackO) const override {
-                while(!stackO.empty() && stackO.front()->priority() >= priority()) {
-                    stackO.front()->delStack(stackT);
-                    stackO.pop_front();
-                }
-                stackO.emplace_front(me);
-            }
-            void delStack(_StackT& stackT) const override {
-                auto iter1 = stackT.begin();
-                auto iter2 = iter1 ++;
-                *iter1 = _func(std::move(*iter1), std::move(*iter2));
-                stackT.pop_front();
-            }
-        };
-      // _Unary
-        template<bool Suf>
-        struct _Unary: public _Operation {
-        private:
-            using _Operation::priority;
-            _FuncUn _func;
-        public:
-            _Unary(int priority, _FuncUn func): 
-                _Operation(priority),
-                _func(func) {}
+			_state = _state()[letter];
+            const auto& type = _state().type();
             
-            void deallocate(Allocator alloc, _PtrO ptr) override {
-                using This = _Unary;
-                auto thisPtr = static_cast<_Ptr<This>>(ptr);
-                _Alloc<This> localAlloc(alloc);
-                This* realPtr = &*thisPtr;
-                _AllocTraits<This>::destroy(localAlloc, realPtr);
-                _AllocTraits<This>::deallocate(localAlloc, thisPtr, 1);
-            }
-
-            void addStack(_PtrCO me, _StackT& stackT, _StackO& stackO) const override {
-                if (Suf) {
-                    stackT.front() = _func(std::move(stackT.front()));
-                } else {
-                    while(!stackO.empty() && stackO.front()->priority() >= priority()) {
-                        stackO.front()->delStack(stackT);
-                        stackO.pop_front();
-                    }
-                    stackO.emplace_front(me);
+			if (type == _typeTable) { // is operation
+				_LRule rule = _table->get(letter);
+                switch (rule().type()) {
+                case RuleRPNType::PrefixUnary:
+                    _stackR.emplace_back(rule);
+                    break;
+                case RuleRPNType::SuffixUnary:
+                    _removeRuleFromStack(rule);
+                    _executeRule(rule);
+                    break;
+                case RuleRPNType::Binary:
+                    _removeRuleFromStack(rule);
+                    _addRuleToStack(rule);
+                    break;
+                default:
+                    throw std::string{"Unknow type rule"};
                 }
-            }
-
-            void delStack(_StackT& stackT) const override {
-                if (!Suf) {
-                    stackT.front() = _func(std::move(stackT.front()));
+            } else if (type == _typeOpen) { // is open bracket
+                _tryAddEpsRuleToStack();
+                _stackR.emplace_back();
+            } else if (type == _typeClose) { // is close bracket
+                while(_stackR.size() && !_stackR.back().empty()) {
+                    _executeRule(_stackR.back());
+                    _stackR.pop_back();
                 }
-            }
-        };
-      // _Brackets
-        template<bool Open>
-        struct _Brackets: public _Operation {
-            static constexpr int _bracketPrior = -1;
-        public:
-            _Brackets(): 
-                _Operation(_bracketPrior) {}
-            
-            void deallocate(Allocator alloc, _PtrO ptr) override {
-                using This = _Brackets;
-                auto thisPtr = static_cast<_Ptr<This>>(ptr);
-                _Alloc<This> localAlloc(alloc);
-                This* realPtr = &*thisPtr;
-                _AllocTraits<This>::destroy(localAlloc, realPtr);
-                _AllocTraits<This>::deallocate(localAlloc, thisPtr, 1);
-            }
-
-            void addStack(_PtrCO me, _StackT& stackT, _StackO& stackO) const override {
-                if (Open) {
-                    stackO.emplace_front(me);
-                } else {
-                    while(!stackO.empty() && stackO.front()->priority() != _bracketPrior) {
-                        stackO.front()->delStack(stackT);
-                        stackO.pop_front();
-                    }
-                    stackO.pop_front();
+                if (_stackR.empty()) {
+                    throw std::string{"Missing open bracket"};
                 }
-            }
-            
-            void delStack(_StackT& stackT) const override {}
-        };
-      // member
-        _VectorS2O _s2o;
-        _FuncBin _endFuncBin;
-        _FuncUn _endFuncUn;
-        _Ptr<Creator> _creator;
-      // functions
-        template<class U, class... Args>
-        static _Ptr<U> _allocate(Allocator alloc, Args&&... args) {
-            _Alloc<U> localAlloc(alloc);
-            _Ptr<U> ptr = _AllocTraits<U>::allocate(localAlloc, 1);
-            U* realPtr = &*ptr;
-            _AllocTraits<U>::construct(localAlloc, realPtr, std::forward<Args>(args)...);
-            return ptr;
-        }
-
-        template<class U>
-        static void _deallocate(Allocator alloc, _Ptr<U> ptr) {
-            _Alloc<U> localAlloc(alloc);
-            U* realPtr = &*ptr;
-            _AllocTraits<U>::destroy(localAlloc, realPtr);
-            _AllocTraits<U>::deallocate(localAlloc, ptr, 1);
-        }
-
-        static bool _comp(const _SymbolToOparation& s2o, char letter) {
-            return s2o.first < letter;
-        }
-
-        auto _alloc() {
-            return _s2o.get_allocator();
-        }
-
-        inline void _processSymbol(Char letter, _StackT& stackT, _StackO& stackO) const {
-            auto iter = std::lower_bound(_s2o.begin(), _s2o.end(), letter, _comp);
-            if (iter != _s2o.end() && iter->first == letter) {
+                _stackR.pop_back();
+            } else if (type != _typeEmpty) { // is simple letter
+                _creator->put(letter, type);
                 if (!_creator->empty()) {
-                    stackT.emplace_front(_creator->get());
+                    _tryAddEpsRuleToStack();
+                    _stackT.emplace_back(_creator->get());
                 }
-                iter->second->addStack(iter->second, stackT, stackO);
-            } else {
-                _creator->emplace(letter);
             }
+            return *this;
+        } catch (const std::string& error) {
+            _defaultSettings();
+            throw std::string{"In put letter = "} + letter + " type = " +  _state().type() + ": " + error;
         }
 
-        inline _T _completion(_StackT& stackT, _StackO& stackO) const {
-            if (!_creator->empty()) {
-                stackT.emplace_front(_creator->get());
-            }
-            while(!stackO.empty()) {
-                stackO.front()->delStack(stackT);
-                stackO.pop_front();
-            }
-            _T ret = std::move(stackT.front());
-            stackT.pop_front();
-            if(_endFuncBin) {
-                while(!stackT.empty()) {
-                    ret = _endFuncBin(std::move(ret), std::move(stackT.front()));
-                    stackT.pop_front();
+        _T get() try {
+            while (_stackR.size()) {
+                if (_stackR.back().empty()) {
+                    throw std::string{"Missing close bracket"};
                 }
+                _executeRule(_stackR.back());
+                _stackR.pop_back();
             }
-            if(_endFuncUn) {
-                ret = _endFuncUn(std::move(ret));
+            if (_stackT.size() > 1) {
+                throw std::string{"Many argues"};
             }
-            return ret;
+            if (_stackT.empty()) {
+                throw std::string{"Little argues"};
+            }
+            _T out = std::move(_stackT.back());
+            _defaultSettings();
+            return out;
+        } catch(const std::string& error) {
+            _defaultSettings();
+            throw std::string{"In get: "} + error;
         }
+    private:
+      // function
+        void _removeRuleFromStack(_LRule rule) {
+            while (
+                _stackR.size() &&
+                !_stackR.back().empty() &&
+                _stackR.back()().priority() >= rule().priority()) 
+            {
+                _executeRule(_stackR.back());
+                if (rule().type() == RuleRPNType::Binary) {
+                    -- _counterTbyR;
+                }
+                _stackR.pop_back();
+            }
+        }
+        void _addRuleToStack(_LRule rule) {
+            _stackR.emplace_back(rule);
+            if (rule().type() == RuleRPNType::Binary) {
+                ++ _counterTbyR;
+            }
+        }
+        void _addEpsRuleToStack() {
+            _LRule rule = _table->get(_Letter());
+            if (rule().type() == RuleRPNType::Binary) {
+                _removeRuleFromStack(rule);
+                _addRuleToStack(rule);
+            } else {
+                throw std::string{"Eps rule is not binary"};
+            }
+        }
+        void _tryAddEpsRuleToStack() {
+            if (_stackT.size() > _counterTbyR) {
+                _addEpsRuleToStack();
+            }
+        }
+        void _executeRule(_LRule rule) {
+            switch(rule().type()) {
+            case RuleRPNType::Binary:
+                if (_stackT.size() < 2) {
+                    throw std::string{"StackT is little for binary rule "} + rule().letter();
+                }
+                {
+                    auto& first = *(++_stackT.rbegin());
+                    auto& second = _stackT.back();
+                    rule()(first, std::move(second));
+                    _stackT.pop_back();
+                }
+                break;
+            case RuleRPNType::PrefixUnary:
+                if (!_stackT.size()) {
+                    throw std::string{"StackT is little for prifix rule "} + rule().letter();
+                }
+                rule()(_stackT.back());
+                break;
+            case RuleRPNType::SuffixUnary:
+                if (!_stackT.size()) {
+                    throw std::string{"StackT is little for suffix rule "} + rule().letter();
+                }
+                rule()(_stackT.back());
+                break;
+            default:
+                throw  std::string{"This rule unknow type in rpn"}; 
+            }
+        }
+        void _defaultSettings() {
+            _stackT.clear();
+            _stackR.clear();
+            _creator->clear();
+            _state = _dfa->start();
+            _counterTbyR = 0;
+        }
+      // members
+        const DFA* _dfa;
+        Creator* _creator;
+        const Table* _table;
+        
+        _LState _state;
+        
+        _StackT _stackT;
+        _StackR _stackR;
+        size_t _counterTbyR = 0;
+
+        _TypeDFA _typeTable;
+        _TypeDFA _typeOpen;
+        _TypeDFA _typeClose;
+        _TypeDFA _typeEmpty;
+   
     };
-} // namespace sb
+
+    template<class DFA, class Creator, class Table>
+    RPN(const DFA&, Creator&, const Table&) -> RPN<DFA, Creator, Table>;
+
+    template<class DFA, class Creator, class Table, class Allocator>
+    RPN(const DFA&, Creator&, const Table&, const Allocator&) -> RPN<DFA, Creator, Table, Allocator>;
+};

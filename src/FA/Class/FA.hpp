@@ -14,8 +14,7 @@ namespace sb {
         class Char = char,
         class StateType = uint64_t,
         class Allocator = std::allocator<Char>
-    >
-    class FA {
+    > class FA {
     public:
       // classes
         struct State;
@@ -80,7 +79,7 @@ namespace sb {
             return _states.emplace_back(type);
         }
 
-        void splice(FA& other) & { // other become empty
+        void splice(FA&& other) & { // other become empty
             _states.splice(_states.end(), other._states);
         }
 
@@ -118,7 +117,7 @@ namespace sb {
             }
 
             void erase(Char letter, const State& state) & {
-                _trans.erase(_Jump(letter, const_cast<State*>(&state)));
+                _trans.erase(Transition(letter, const_cast<State&>(state)));
             }
 
             void erase(Char letter) & {

@@ -4,44 +4,36 @@
 
 namespace sb {
     template<C_NFA NFA>
-    NFA concat(NFA&& left,
-               NFA&& right,
-               FATraitsLe<NFA> eps = FATraitsLe<NFA>()) {
-        NFA ret;
-        left.finish().emplace(eps, right.start());
-        ret.splice(left);
-        ret.splice(right);
-        return ret;
+    void concat(NFA& left,
+                NFA&& right) {
+        for (auto& trans: right.start()) {
+            left.finish().emplace(trans.letter(), trans.next());
+        }
+        left.finish().type() = right.start().type();
+        right.erase(right.begin());
+        left.splice(std::move(right));
     }
 
     template<C_NFA NFA>
-    NFA alter(NFA&& left,
-              NFA&& right,
-              FATraitsLe<NFA> eps = FATraitsLe<NFA>()) {
-        NFA ret;
-        auto& finishL = left.finish();
-        auto& startR = right.start();
-        ret.splice(left);
-        ret.splice(right);
-        finishL.emplace(eps, ret.finish());
-        ret.start().emplace(eps, startR);
-        return ret;
+    void alter(NFA& left,
+               NFA&& right) {
+        for (auto& trans: right.start()) {
+            left.start().emplace(trans.letter(), trans.next());
+        }
+        right.erase(right.begin());
+        left.splice(std::move(right));
     }
 
     template<C_NFA NFA>
-    NFA kleene(NFA&& nfa,
-               FATraitsLe<NFA> eps = FATraitsLe<NFA>()) {
-        NFA ret(std::move(nfa));
-        ret.start().emplace(eps, ret.finish());
-        ret.finish().emplace(eps, ret.start());
-        return ret;
+    void kleene(NFA& nfa) {
+        auto eps = FATraitsLe<NFA>();
+        nfa.start().emplace(eps, nfa.finish());
+        nfa.finish().emplace(eps, nfa.start());
     }
 
     template<C_NFA NFA>
-    NFA plus(NFA&& nfa,
-             FATraitsLe<NFA> eps = FATraitsLe<NFA>()) {
-        NFA ret(std::move(nfa));
-        ret.finish().emplace(eps, ret.start());
-        return ret;
+    void plus(NFA& nfa) {
+        auto eps = FATraitsLe<NFA>();
+        nfa.finish().emplace(eps, nfa.start());
     }
 } // namespace sb
