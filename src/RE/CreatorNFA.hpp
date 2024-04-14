@@ -114,7 +114,6 @@ namespace sb {
             state = 0;
             _nfa.emplace(); // add start state
             _nfa.emplace(); // add finish state
-            _nfa.finish().type() = 1;
         }
       // members
         NFA _nfa;

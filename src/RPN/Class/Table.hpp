@@ -31,7 +31,6 @@ namespace sb {
         using _Int = char;
 
        // for Functions
-    public:
         using _ListBinFunc = TypeList<
             T(*)(T&&, T&&),
             T(*)(const T&, const T&),
@@ -48,6 +47,7 @@ namespace sb {
             void(*)(T&)
         >;
         static constexpr size_t _unSize = Size<_ListUnFunc>::value;
+        static constexpr size_t _allSize = _binSize + 2 * _unSize;
     public:
       // functions
         template<C_BelongTo<_ListBinFunc> Func>
@@ -68,6 +68,12 @@ namespace sb {
             _addRule(letter, priority, type, reinterpret_cast<void*>(func));
         }
 
+        template<C_BelongTo<_ListUnFunc> Func>
+        void putEndUnary(Func func) {
+            _Int type = BelongTo<Func, _ListUnFunc>::number * 2 + 1 + _binSize;
+            _endRule = Rule(Letter(), 0, type, reinterpret_cast<void*>(func));
+        }
+
         const Rule& get(Letter letter) const {
             size_t l = 0;
             size_t r = _rules.size();
@@ -84,6 +90,10 @@ namespace sb {
             }
             return _rules[l];
         }
+
+        const Rule& getEnd() const {
+            return _endRule;
+        }
       // Rule
         struct Rule {
         public:
@@ -94,12 +104,21 @@ namespace sb {
                 _priority(priority),
                 _type(type)
             {}
+
             Rule(const Rule& other):
                 _func(other._func),
                 _letter(other._letter),
                 _priority(other._priority),
                 _type(other._type)
             {}
+
+            Rule& operator = (const Rule& other) & {
+                _func = other._func;
+                _letter = other._letter;
+                _priority = other._priority;
+                _type = other._type;
+                return *this;
+            }
 
             const Letter& letter() const { return _letter; }
             RuleRPNType type() const {
@@ -163,7 +182,7 @@ namespace sb {
                     func(first);
                     } break;
                 default:
-                    throw std::string{"dont find unary function from table by type"};
+                    break;
                 }
             }
         private:
@@ -184,5 +203,6 @@ namespace sb {
         }
       // members
         _Rules _rules;
+        Rule _endRule = Rule(Letter(), 0, _allSize, nullptr);
     };
 };

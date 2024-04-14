@@ -70,7 +70,15 @@ namespace sb {
         auto erase(_States::const_iterator iter) & {
             return _states.erase(iter);
         }
+        void splice(FA&& other) & { // other become empty
+            _states.splice(_states.end(), other._states);
+        }
+        void clear() { _states.clear(); }
 
+        size_t size() const { return _states.size(); }
+
+        bool empty() const { return _states.empty(); }
+       // emplaces
         State& emplace() & {
             return _states.emplace_back();
         }
@@ -79,15 +87,21 @@ namespace sb {
             return _states.emplace_back(type);
         }
 
-        void splice(FA&& other) & { // other become empty
-            _states.splice(_states.end(), other._states);
+        State& emplace_back(const StateType& type) & {
+            return _states.emplace_back(type);
         }
 
-        void clear() { _states.clear(); }
+        State& emplace_back() & {
+            return _states.emplace_back();
+        }
 
-        size_t size() const { return _states.size(); }
+        State& emplace_front(const StateType& type) & {
+            return _states.emplace_front(type);
+        }
 
-        bool empty() const { return _states.empty(); }
+        State& emplace_front() & {
+            return _states.emplace_front();
+        }
       // State
         struct State {
         private:

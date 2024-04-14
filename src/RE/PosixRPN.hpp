@@ -21,6 +21,10 @@ namespace sb {
         using CreatorNFA = CreatorNFA<NFA, Type>;
         using TableRPN = TableRPN<NFA, Letter>;
         using RPN = RPN<DFA, CreatorNFA, TableRPN>;
+
+        void endUnary(NFA& nfa) {
+            nfa.finish().type() = 1;
+        }
     }
     
     auto makePosixRPN() {
@@ -46,6 +50,7 @@ namespace sb {
         table->addSufUnary('*', 2, kleene<posix::NFA>);
         table->addSufUnary('+', 2, plus<posix::NFA>);
         table->addSufUnary('?', 2, question<posix::NFA>);
+        table->putEndUnary(posix::endUnary);
       // make rpn
         posix::RPN* rpn = new posix::RPN(*dfa, *creator, *table);
         rpn->putTypeTable('t');

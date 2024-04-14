@@ -139,9 +139,9 @@ namespace sb {
                     _stackT.emplace_back(_creator->get());
                 }
             }
-            #ifdef RPN_DEBUG
+           #ifdef RPN_DEBUG
             drawCondition(letter, type);
-            #endif
+           #endif
             return *this;
         } catch (const std::string& error) {
             _defaultSettings();
@@ -163,6 +163,7 @@ namespace sb {
                 throw std::string{"Little argues"};
             }
             _T out = std::move(_stackT.back());
+            _table->getEnd()(out);
             _defaultSettings();
             return out;
         } catch(const std::string& error) {
@@ -243,7 +244,7 @@ namespace sb {
             _state = _dfa->start();
             _counterTbyR = 0;
         }
-        #ifdef RPNDEBUG
+       #ifdef RPNDEBUG
         void drawCondition(_Letter letter, const _TypeDFA& type) {
             std::cout << "--------\n";
             std::cout << letter << ' ' << type << '\n';
@@ -259,7 +260,7 @@ namespace sb {
             }
             std::cout << '\n';
         }
-        #endif
+       #endif
       // members
         const DFA* _dfa;
         Creator* _creator;

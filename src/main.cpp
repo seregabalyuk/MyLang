@@ -17,8 +17,9 @@ int main() {
 			std::get<0>(all)->put(letter);
 		}
 		auto nfa = std::get<0>(all)->get();
-
+		sb::printFA(std::cout, nfa) << '\n';
 		auto dfa = sb::nfa2dfa<sb::FA<0>>(nfa);
+		sb::printFA(std::cout, dfa) << '\n';
 		
 		std::string in;
 		std::getline(std::cin, in, '\n');
