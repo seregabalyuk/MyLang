@@ -6,21 +6,13 @@ It consists of **rules** and **symbols**.
 **Terminal** contain **T**.
 More about [**CFG**](https://en.wikipedia.org/wiki/Context-free_grammar).
 
-**Rule** - is link to **rule**
+**Rule** - is **rule**
 
-**ConstRule** - is link to **const rule**
+**Symbol** - is **symbol**
 
-**Symbol** - is link to **symbol**
+**Terminal** - is **terminal**
 
-**ConstSymbol** - is link to **const symbol**
-
-**Terminal** - is link to **terminal**
-
-**ConstTerminal** - is link to **const terminal**
-
-**NonTerminal** - is link to **nonterminal**
-
-**ConstNonTerminal** - is link to **const nonterminal**
+**NonTerminal** - is **nonterminal**
 
 **T** - is type like char or DFA.
 
@@ -35,35 +27,41 @@ cfg.cstart();       // return ConstSymbol
 const_cfg.start();  // return ConstSymbol
 const_cfg.cstart(); // return ConstSymbol
 
-cfg.emplace_terminal(name, ...); // return Terminal
+cfg.emplace_terminal(...); // return Terminal
 cfg.emplace_nonterminal(name);   // return NonTerminal
 
 cfg.emplace_rule(nonTerminal);   // return Rule
+cfg.emplace_rule(nonTerminal, {Symbol& a, ...});   // return Rule
 
-cfg.rules(nonTerminal); // return {begin, end} of Rule
-const_cfg.rules(nonTerminal); // return {begin, end} of ConstRule
+cfg.rules();
+cfg.symbols();
+cfg.terminals();
+cfg.nonterminals();
 ```
 
-## struct Symbol and ConstSymbol
+## struct Symbol
 ### Requirements
 
 **Symbol** must have metods:
 
 ```c++
-ConstSymbol constSymbol;
+const Symbol const_symbol;
 Symbol symbol;
 
-constSymbol.is_terminal(); // return bool
-Symbol.is_terminal();      // return bool
+const_symbol.isTerminal(); // return bool
+symbol.isTerminal();      // return bool
 
-Symbol.name();      // return name&
-constSymbol.name(); // return const name&
+const_symbol.isNonTerminal(); // return bool
+symbol.isNonTerminal();      // return bool
 
-Symbol.get_terminal();    // return Terminal
-Symbol.get_nonterminal(); // return NonTerminal
+symbol.name();      // return name&
+const_symbol.name(); // return const name&
 
-constSymbol.get_terminal();    // return ConstTerminal
-constSymbol.get_nonterminal(); // return ConstNonTerminal
+symbol.getTerminal();    // return Terminal
+symbol.getNonterminal(); // return NonTerminal
+
+const_symbol.getTerminal();    // return ConstTerminal
+const_symbol.getNonterminal(); // return ConstNonTerminal
 ```
 
 You need use it:
@@ -71,31 +69,31 @@ You need use it:
 ```c++
 Symbol symbol;
 if (symbol.is_terminal()) {
-    auto terminal = symbol.get_terminal();
+    auto& terminal = symbol.get_terminal();
 } else {
-    auto nonterminal = symbol.get_nonterminal();
+    auto& nonterminal = symbol.get_nonterminal();
 }
 ```
 
-## struct Rule and ConstRule
+## struct Rule
 ### Requirements
 1) **Rule** must support the syntax:
     ```c++
     Rule rule;
-    for (auto symbol: rule) {
+    for (auto& symbol: rule) {
         // your code
     }
 
-    ConstRule constRule;
-    for (auto constSymbol: constRule) {
+    const Rule constRule;
+    for (auto& constSymbol: constRule) {
         // your code
     }
     ```
 2) **Rule** must have methods:
     ```c++
     Rule rule;
-    ConstRule constRule;
-
+    const Rule constRule;
+    
     size_t i;
 
     rule[i]; // return Symbol
@@ -107,6 +105,6 @@ if (symbol.is_terminal()) {
     constRule.argument(); // return ConstNonTerminal
     ```
 
-## struct Terminal and ConstTerminal
+## struct Terminal
 ### Requirements
 **Terminal** must have methods:
