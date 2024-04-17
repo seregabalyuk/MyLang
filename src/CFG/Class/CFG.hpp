@@ -1,6 +1,7 @@
 #pragma once
 
 #include <forward_list>
+#include <vector>
 
 namespace sb {
     template<
@@ -23,9 +24,43 @@ namespace sb {
         template<class U>
         using _Ptr = _AllocTraits<U>::pointer;
 
-        using _Symbols = std::forward_list<Symbol, _Alloc<Symbol>>;
+        using _Terminals = std::forward_list<Terminal, _Alloc<Terminal>>;
+        using _NonTerminals = std::forward_list<NonTerminal, _Alloc<NonTerminal>>;
+
         using _Rules = std::forward_list<Rule, _Alloc<Rule>>;
+        using _Symbols = std::vector<_Ptr<Symbol>, _Alloc<_Ptr<Symbol>>>;
     public:
+      // metods
+        CFG(const Allocator& alloc = Allocator()):
+            _terminals(alloc),
+            _nonterminals(alloc)
+        {}
+        template<class... Args>
+        auto emplace_terminal(Args&&... args) -> Terminal& {
+            auto& ref = _terminals.emplace_front(std::forward<Args>(args)...);
+            if (_start == nullptr) {
+                _start = &ref;
+            }
+            return ref;
+        }
+        template<class... Args>
+        auto emplace_nonterminal(Args&&... args) -> NonTerminal& {
+            auto& ref = _nonterminals.emplace_front(
+                _nonterminals.get_allocator(),
+                std::forward<Args>(args)...
+            );
+            if (_start == nullptr) {
+                _start = &ref;
+            }
+            return ref;
+        }
+        auto emplace_rule(NonTerminal& nonterminal) -> Rule&{
+            return nonterminal.rules().emplace_front(
+                nonterminal,
+                _nonterminals.get_allocator()
+            );
+        }
+
       // Symbol
         class Symbol {
         public:
@@ -35,13 +70,98 @@ namespace sb {
             bool isNonTerminal() {
                 return !_isTerminal;
             }
-        private:
+            Terminal& getTerminal() {
+              return *static_cast<Terminal*>(this);
+            }
+            const Terminal& getTerminal() const {
+              return *static_cast<const Terminal*>(this);
+            }
+            NonTerminal& getNonTerminal() {
+              return *static_cast<NonTerminal*>(this);
+            }
+            const NonTerminal& getNonTerminal() const {
+              return *static_cast<const NonTerminal*>(this);
+            }
+        protected:
           // members
             bool _isTerminal;
-            _Ptr<void> _ptr;
+        };
+      // Terminal
+        class Terminal: public Symbol {
+		public:
+            template<class... Args>
+            Terminal(Args&&... args):
+                _value(std::forward<Args>(args)...)
+            {}
+			T& value() {
+				return _value;
+			}
+			const T& value() const {
+				return _value;
+			}
+        private:
+            T _value;
+		};
+	  // NonTerminal
+	  	class NonTerminal: public Terminal {
+	    public:
+          // metods
+            NonTerminal(const Allocator& alloc, const Name& name):
+                _name(name),
+                _rules(alloc)
+            {}
+            NonTerminal(const Allocator& alloc, Name&& name):
+                _name(std::move(name)),
+                _rules(alloc)
+            {}
+            
+			_Rules& rules() {
+				return _rules;
+			}
+			const _Rules& rules() const {
+				return _rules;
+			}
+            const Name& name() const {
+                return _name;
+            }
+        private:
+          // members
+            Name _name;
+            _Rules _rules;
+		};
+      // Rule
+        class Rule {
+        public:
+            Rule(NonTerminal& arg, const Allocator& alloc):
+                _argument(&arg),
+                _symbols(alloc)
+            {}
+
+            const NonTerminal& argument() const {
+                return *_argument;
+            }
+            const Symbol& operator[](size_t index) const {
+                return _symbols[index];
+            }
+
+            NonTerminal& argument() {
+                return *_argument;
+            }
+            Symbol& operator[](size_t index) {
+                return *_symbols[index];
+            }
+
+            void emplace_back(Symbol& other) {
+                _symbols.emplace_back(&other);
+            }
+        private:
+            _Ptr<NonTerminal> _argument;
+            _Symbols _symbols;
         };
     private:
-       _Symbols symbols;
-       _Rules rules;
+	  // members
+        _Terminals _terminals;
+        _NonTerminals _nonterminals;
+        _Ptr<Symbol> _start = nullptr;
     };
 } // namespace sb

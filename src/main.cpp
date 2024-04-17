@@ -1,44 +1,30 @@
 #include <iostream>
-
-#include <FA/Print.hpp>
-#include <RE/PosixRPN.hpp>
-#include <FA/Algo/NFA2DFA.hpp>
-#include <CFG/Class/CFG.hpp>
-#include <FA/Class/FastDFA.hpp>
-
-struct A {
-	char a, b, c;
-};
+#include <Base/Tree/Print.hpp>
 
 int main() {
-	try {
-		std::string str;
-		{ std::ifstream fin("../src/example.txt");
-		  std::getline(fin, str, '\n');
-		}
-		std::cout << str << '\n';
+    sb::Tree tree;
+    auto& vertex = sb::Tree::makeVertex<std::string>(tree, "ok");
+    sb::Tree::makeVertex<std::string>(vertex, "one");
+    auto& robot = sb::Tree::makeVertex<std::string>(vertex, "robot");
+    auto& hhh = sb::Tree::makeVertex<std::string>(robot, "detail1");
+    sb::Tree::makeVertex<std::string>(hhh, "detail01");
+    sb::Tree::makeVertex<std::string>(hhh, "detail02");
 
-		auto all = sb::makePosixRPN();
-		for (auto letter: str) {
-			std::get<0>(all)->put(letter);
-		}
-		auto nfa = std::get<0>(all)->get();
-		auto dfa = sb::nfa2dfa<sb::FA<0>>(nfa);
-		sb::FastDFA fastdfa(dfa);
-		
-		
-		std::string in;
-		std::getline(std::cin, in, '\n');
-		Link state = fastdfa.start();
-		for (auto letter: in) {
-			state = state()[letter];
-		}
-		if (state().type() == 1) {
-			std::cout << "belong\n";
-		} else {
-			std::cout << "no\n";
-		}
-	} catch (const std::string& error) {
-		std::cout << error << '\n';
-	}
+    auto& h = sb::Tree::makeVertex<std::string>(robot, "detail2");
+    sb::Tree::makeVertex<std::string>(h, "lol");
+    
+    auto& det = sb::Tree::makeVertex<std::string>(robot, "detail3");
+    sb::Tree::makeVertex<std::string>(det, "det");
+    sb::Tree::makeVertex<std::string>(det, "det");
+    
+
+    sb::Tree::makeVertex<std::string>(vertex, "two");
+    sb::Tree::makeVertex<std::string>(vertex, "three");
+    auto& four = sb::Tree::makeVertex<std::string>(vertex, "four");
+    sb::Tree::makeVertex<std::string>(four, "0");
+    sb::Tree::makeVertex<std::string>(four, "2");
+    sb::Tree::makeVertex<std::string>(four, "3");
+    
+    
+    sb::printTree(std::cout, tree);
 }

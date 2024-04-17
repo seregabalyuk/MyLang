@@ -33,8 +33,8 @@ cfg.emplace_nonterminal(name);   // return NonTerminal
 cfg.emplace_rule(nonTerminal);   // return Rule
 cfg.emplace_rule(nonTerminal, {Symbol& a, ...});   // return Rule
 
-cfg.rules();
-cfg.symbols();
+cfg.rules(nonTerminal); // return Rules
+
 cfg.terminals();
 cfg.nonterminals();
 ```
@@ -53,9 +53,6 @@ symbol.isTerminal();      // return bool
 
 const_symbol.isNonTerminal(); // return bool
 symbol.isNonTerminal();      // return bool
-
-symbol.name();      // return name&
-const_symbol.name(); // return const name&
 
 symbol.getTerminal();    // return Terminal
 symbol.getNonterminal(); // return NonTerminal
