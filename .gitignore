@@ -1,3 +1,4 @@
-/.bin
-/.build
-/.tresh
+/bin
+/build
+/tresh
+/test

@@ -5,7 +5,7 @@
 #include <map>
 #include <algorithm>
 
-#include "Concept.hpp"
+#include <FA/Class/Concept.hpp>
 
 namespace sb {
     template<class Letter, class Type, class Allocator = std::allocator<size_t>>
@@ -27,6 +27,9 @@ namespace sb {
         using _States = std::vector<State, _Alloc<State>>;
     public:
       // functions
+        FastDFA(const Allocator& alloc = Allocator()):
+            _states(alloc) {}
+
         template<C_DFA DFA>
         FastDFA(const DFA& prototype, const Allocator& alloc = Allocator()):
             _states(alloc) {
@@ -37,10 +40,25 @@ namespace sb {
             return _states.front();
         }
 
+        const State& cstart() const { 
+            return _states.front();
+        }
+
+        State& start() { 
+            return _states.front();
+        }
+
         auto begin() const { return _states.begin(); }
         auto end() const { return _states.begin(); }
+
+        auto begin() { return _states.begin(); }
+        auto end() { return _states.begin(); }
         
         const State& operator[](size_t index) const {
+            return _states[index];
+        }
+
+        State& operator[](size_t index) {
             return _states[index];
         }
 
@@ -48,6 +66,8 @@ namespace sb {
             return _states.size();
         }
 
+        const _States& vec() const { return _states; }
+        _States& vec() { return _states; }
       // State
         struct State {
         public:
@@ -64,13 +84,25 @@ namespace sb {
             const Type& type() const {
                 return _type;
             };
+            Type& type() {
+                return _type;
+            };
 
             auto begin() const {
                 return _trans.begin();
             }
-
             auto end() const {
                 return _trans.end();
+            }
+            auto begin() {
+                return _trans.begin();
+            }
+            auto end() {
+                return _trans.end();
+            }
+
+            size_t size() const {
+                return _trans.size();
             }
 
             inline size_t count(Letter letter) const {
@@ -199,19 +231,4 @@ namespace sb {
 
     template<C_DFA DFA>
     FastDFA(const DFA&) -> FastDFA<FATraitsLe<DFA>, FATraitsTy<DFA>>;
-    /*
-    template<class Cout, class A, class B, class C>
-    Cout& printFastDFA(Cout& cout, const FastDFA<A, B, C>& fastdfa) {
-        for (size_t i = 0; i < fastdfa.size(); ++ i) {
-			auto& state = fastdfa[i];
-			cout << i << ", " << state.type() << ": ";
-			for (auto& trans: state) {
-				cout << (int)trans.letter() << ">" << trans.number() << ", ";
-			}
-			cout << '\n';
-		}
-		cout << '\n';
-        return cout;
-    }
-    */
 }; 

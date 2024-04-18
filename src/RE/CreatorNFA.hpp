@@ -49,6 +49,10 @@ namespace sb {
         void putTypeSpecial(const Type& type) {
             _special = type;
         }
+
+        void putTypeKind(const Type& type) {
+            _kind = type;
+        }
       // for RPN
         void put(_Letter letter, const Type& type) try {
             if (type == _simple) {
@@ -79,6 +83,9 @@ namespace sb {
                 } else {
                     _nfa.start().emplace(letter, _nfa.finish());
                 }
+                state = 1;
+            } else if (type == _kind) {
+                _nfa.finish().type() = letter;
                 state = 1;
             }
             _back = letter;
@@ -131,5 +138,6 @@ namespace sb {
         Type _inBrackets;
         Type _outBrackets;
         Type _special;
+        Type _kind = -1;
     };
 } // namespace sb

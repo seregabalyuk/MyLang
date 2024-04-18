@@ -1,7 +1,5 @@
 #pragma once
 
-#include <algorithm>
-
 #include <FA/Class/Concept.hpp>
 
 #include "SetStateFA.hpp"
@@ -43,15 +41,6 @@ namespace sb {
             visitAll<FA>(trans.next(), eps, visits);
         }
     }
-    
-    template<class FA>
-    struct _RemoverFA {
-        SetStateFA<FA>& _set;
-
-        bool operator()(FATraitsSt<FA>& state) const {
-            return !_set.count(state);
-        };
-    };
 
     template<C_FA FA>
     void removeEps(FA& fa, FATraitsLe<FA> eps) {
@@ -60,7 +49,6 @@ namespace sb {
         for (auto& state: visits) {
             state.erase(eps);
         }
-        std::remove_if(fa.begin(), fa.end(), _RemoverFA<FA>(visits));
     }
 
     

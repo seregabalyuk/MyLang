@@ -1,30 +1,24 @@
 #include <iostream>
-#include <Base/Tree/Print.hpp>
+#include <fstream>
+
+#include <FA/FastDFA/Open.hpp>
+#include <FA/FastDFA/Print.hpp>
+#include <Base/Link.hpp>
+
 
 int main() {
-    sb::Tree tree;
-    auto& vertex = sb::Tree::makeVertex<std::string>(tree, "ok");
-    sb::Tree::makeVertex<std::string>(vertex, "one");
-    auto& robot = sb::Tree::makeVertex<std::string>(vertex, "robot");
-    auto& hhh = sb::Tree::makeVertex<std::string>(robot, "detail1");
-    sb::Tree::makeVertex<std::string>(hhh, "detail01");
-    sb::Tree::makeVertex<std::string>(hhh, "detail02");
+    std::ifstream fin("../test/example.dfa");
+    sb::FastDFA<char, char> fastdfa;
+    sb::openFastDFA(fin, fastdfa);
 
-    auto& h = sb::Tree::makeVertex<std::string>(robot, "detail2");
-    sb::Tree::makeVertex<std::string>(h, "lol");
-    
-    auto& det = sb::Tree::makeVertex<std::string>(robot, "detail3");
-    sb::Tree::makeVertex<std::string>(det, "det");
-    sb::Tree::makeVertex<std::string>(det, "det");
-    
+    sb::printFastDFA(std::cout, fastdfa);
 
-    sb::Tree::makeVertex<std::string>(vertex, "two");
-    sb::Tree::makeVertex<std::string>(vertex, "three");
-    auto& four = sb::Tree::makeVertex<std::string>(vertex, "four");
-    sb::Tree::makeVertex<std::string>(four, "0");
-    sb::Tree::makeVertex<std::string>(four, "2");
-    sb::Tree::makeVertex<std::string>(four, "3");
-    
-    
-    sb::printTree(std::cout, tree);
+    std::string in;
+    std::getline(std::cin, in, '\n');
+    Link state = fastdfa.cstart();
+    for (auto letter: in) {
+        state = state()[letter];
+        std::cout << state().type();
+    }
+    std::cout << '\n';
 }

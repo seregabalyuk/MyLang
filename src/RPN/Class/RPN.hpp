@@ -103,7 +103,6 @@ namespace sb {
 			}
 			_state = _state()[letter];
             const auto& type = _state().type();
-            
 			if (type == _typeTable) { // is operation
 				_LRule rule = _table->get(letter);
                 switch (rule().type()) {

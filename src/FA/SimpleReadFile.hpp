@@ -76,7 +76,7 @@ namespace sb {
                         switch(str[i]) {
                         case 'a': // all letter
                           // https://www.industrialnets.ru/files/misc/ascii.pdf
-                            for (char i = '!'; i != '~'; ++ i) {
+                            for (char i = ' '; i != '~'; ++ i) {
                                 state.emplace(i, nextState);
                             }
                             break;

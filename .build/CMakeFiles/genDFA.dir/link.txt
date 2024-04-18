@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/genDFA.dir/src/RE/genDFA.o -o /home/kukarekus/proga/projects/cpp/2024/MyLang/bin/genDFA 

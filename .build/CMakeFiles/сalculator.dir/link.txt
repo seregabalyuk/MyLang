@@ -1,0 +1,1 @@
+/usr/bin/c++ -rdynamic CMakeFiles/сalculator.dir/src/сalculator.o -o /home/kukarekus/proga/projects/cpp/2024/MyLang/bin/сalculator 

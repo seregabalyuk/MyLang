@@ -14,7 +14,7 @@
 namespace sb {
     namespace posix {
         using Letter = char;
-        using NFA = FA<1, Letter>;
+        using NFA = FA<1, Letter, char>;
 
         using Type = char;
         using DFA = FA<0, Letter, Type>;

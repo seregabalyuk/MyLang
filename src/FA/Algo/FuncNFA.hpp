@@ -48,7 +48,7 @@ namespace sb {
         
         nfa.start().emplace(eps, prevstart);
         prevfinish.emplace(eps, nfa.finish());
-    }
+    } // OK
 
     template<C_NFA NFA>
     void plus(NFA& nfa) {
@@ -64,7 +64,7 @@ namespace sb {
         
         nfa.start().emplace(eps, prevstart);
         prevfinish.emplace(eps, nfa.finish());
-    }
+    } // OK
 
     template<C_NFA NFA>
     void question(NFA& nfa) {
@@ -80,5 +80,12 @@ namespace sb {
         
         nfa.start().emplace(eps, prevstart);
         prevfinish.emplace(eps, nfa.finish());
+    } // OK
+
+    template<C_NFA NFA>
+    void setType(
+        NFA& left,
+        NFA&& right) {
+        left.finish().type() |= right.finish().type();
     }
 } // namespace sb
