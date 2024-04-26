@@ -6,12 +6,21 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/bin)
 set(PROJECT_INCLUDES ${CMAKE_SOURCE_DIR}/src)
 
 project(FormalGrammars)
+# libs
+    add_library(DFA STATIC src/Actual/DFA.cpp)
+    target_include_directories(DFA PRIVATE ${PROJECT_INCLUDES})
+    add_library(RE STATIC src/Actual/RE.cpp)
+    target_include_directories(RE PRIVATE ${PROJECT_INCLUDES})
 
-add_executable(main src/main.cpp)
-target_include_directories(main PRIVATE ${PROJECT_INCLUDES})
+# projects
+    add_executable(main src/main.cpp)
+    target_include_directories(main PRIVATE ${PROJECT_INCLUDES})
+    target_link_libraries(main DFA RE)
 
-add_executable(genDFA src/RE/genDFA.cpp)
-target_include_directories(genDFA PRIVATE ${PROJECT_INCLUDES})
+    add_executable(genDFA src/RE/genDFA.cpp)
+    target_include_directories(genDFA PRIVATE ${PROJECT_INCLUDES})
+    target_link_libraries(main DFA RE)
 
-add_executable(сalculator src/сalculator.cpp)
-target_include_directories(сalculator PRIVATE ${PROJECT_INCLUDES})
+    add_executable(сalculator src/сalculator.cpp)
+    target_include_directories(сalculator PRIVATE ${PROJECT_INCLUDES})
+    target_link_libraries(main DFA RE)

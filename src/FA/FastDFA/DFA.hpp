@@ -48,11 +48,26 @@ namespace sb {
             return _states.front();
         }
 
+        const State& finish() const { 
+            return _states.back();
+        }
+
+        const State& cfinish() const { 
+            return _states.back();
+        }
+
+        State& finish() { 
+            return _states.back();
+        }
+
         auto begin() const { return _states.begin(); }
-        auto end() const { return _states.begin(); }
+        auto end() const { return _states.end(); }
 
         auto begin() { return _states.begin(); }
-        auto end() { return _states.begin(); }
+        auto end() { return _states.end(); }
+
+        auto cbegin() const { return _states.begin(); }
+        auto cend() const { return _states.end(); }
         
         const State& operator[](size_t index) const {
             return _states[index];

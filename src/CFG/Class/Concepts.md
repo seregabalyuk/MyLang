@@ -96,7 +96,7 @@ if (symbol.is_terminal()) {
     rule[i]; // return Symbol
     constRule[i]; // return ConstSymbol
 
-    rule.emplace(symbol);
+    rule.emplace_back(symbol);
 
     rule.argument(); // return NonTerminal
     constRule.argument(); // return ConstNonTerminal

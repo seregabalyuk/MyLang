@@ -1,5 +1,0 @@
-/home/kukarekus/proga/projects/cpp/2024/MyLang/.build/CMakeFiles/main.dir
-/home/kukarekus/proga/projects/cpp/2024/MyLang/.build/CMakeFiles/genDFA.dir
-/home/kukarekus/proga/projects/cpp/2024/MyLang/.build/CMakeFiles/сalculator.dir
-/home/kukarekus/proga/projects/cpp/2024/MyLang/.build/CMakeFiles/edit_cache.dir
-/home/kukarekus/proga/projects/cpp/2024/MyLang/.build/CMakeFiles/rebuild_cache.dir

@@ -1,24 +1,20 @@
 #include <iostream>
-#include <fstream>
 
-#include <FA/FastDFA/Open.hpp>
-#include <FA/FastDFA/Print.hpp>
-#include <Base/Link.hpp>
+#include <CFG/Class/CFG.hpp>
+#include <CFG/ReadFile.hpp>
+#include <CFG/Print.hpp>
+#include <CFG/Algo/Earley.hpp>
+#include <CFG/Class/CFG.hpp>
+
+#include <Actual/DFA.hpp>
 
 
-int main() {
-    std::ifstream fin("../test/example.dfa");
-    sb::FastDFA<char, char> fastdfa;
-    sb::openFastDFA(fin, fastdfa);
-
-    sb::printFastDFA(std::cout, fastdfa);
-
-    std::string in;
-    std::getline(std::cin, in, '\n');
-    Link state = fastdfa.cstart();
-    for (auto letter: in) {
-        state = state()[letter];
-        std::cout << state().type();
-    }
-    std::cout << '\n';
+int main() try {
+    sb::CFG<sb::act::DFA> cfg;
+    std::ifstream fin("../test/first.cfg");
+    sb::readFileCFG(fin, cfg);
+    sb::printCFG(std::cout, cfg);
+} catch (const std::string& str) {
+    std::cout << str << '\n';
+    throw;
 }

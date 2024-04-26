@@ -30,6 +30,8 @@ namespace sb {
         using _Rules = std::forward_list<Rule, _Alloc<Rule>>;
         using _Symbols = std::vector<_Ptr<Symbol>, _Alloc<_Ptr<Symbol>>>;
     public:
+      // usings
+        using Type = T;
       // metods
         CFG(const Allocator& alloc = Allocator()):
             _terminals(alloc),
@@ -61,6 +63,18 @@ namespace sb {
             );
         }
 
+        const _Terminals& terminals() const { return _terminals; }
+        _Terminals& terminals() { return _terminals; }
+        
+        const _NonTerminals& nonterminals() const { return _nonterminals; }
+        _NonTerminals& nonterminals() { return _nonterminals; }
+        
+        _Rules& rules(NonTerminal& nonterminal) {
+            return nonterminal.rules();
+        }
+        const _Rules& rules(const NonTerminal& nonterminal) const {
+            return nonterminal.rules();
+        }
       // Symbol
         class Symbol {
         public:
@@ -83,6 +97,9 @@ namespace sb {
               return *static_cast<const NonTerminal*>(this);
             }
         protected:
+          // metods
+            Symbol(bool isTerminal):
+                _isTerminal(isTerminal) {}
           // members
             bool _isTerminal;
         };
@@ -91,7 +108,8 @@ namespace sb {
 		public:
             template<class... Args>
             Terminal(Args&&... args):
-                _value(std::forward<Args>(args)...)
+                _value(std::forward<Args>(args)...),
+                Symbol(true)
             {}
 			T& value() {
 				return _value;
@@ -103,16 +121,18 @@ namespace sb {
             T _value;
 		};
 	  // NonTerminal
-	  	class NonTerminal: public Terminal {
+	  	class NonTerminal: public Symbol {
 	    public:
           // metods
             NonTerminal(const Allocator& alloc, const Name& name):
                 _name(name),
-                _rules(alloc)
+                _rules(alloc),
+                Symbol(false)
             {}
             NonTerminal(const Allocator& alloc, Name&& name):
                 _name(std::move(name)),
-                _rules(alloc)
+                _rules(alloc),
+                Symbol(false)
             {}
             
 			_Rules& rules() {
@@ -151,6 +171,17 @@ namespace sb {
                 return *_symbols[index];
             }
 
+            size_t size() const { return _symbols.size(); }
+
+            auto begin() { return _symbols.begin(); }
+            auto end() { return _symbols.end(); }
+
+            auto begin() const { return _symbols.begin(); }
+            auto end() const { return _symbols.end(); }
+
+            auto cbegin() const { return _symbols.begin(); }
+            auto cend() const { return _symbols.end(); }
+            
             void emplace_back(Symbol& other) {
                 _symbols.emplace_back(&other);
             }
